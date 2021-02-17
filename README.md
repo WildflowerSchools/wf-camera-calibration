@@ -1,3 +1,6 @@
-# MODULE_NAME
+# camera_calibration
 
-SHORT_DESCRIPTION
+Support for calculating intrinsic and extrinsic camera calibration parameters using COLMAP and other tools
+
+## Task list
+* TBD
