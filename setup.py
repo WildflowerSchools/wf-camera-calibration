@@ -6,6 +6,12 @@ VERSION = open(os.path.join(BASEDIR, 'VERSION')).read().strip()
 
 # Dependencies (format is 'PYPI_PACKAGE_NAME[>]=VERSION_NUMBER')
 BASE_DEPENDENCIES = [
+    'wf-cv-utils>=2.0.0',
+    'wf-video-io>=1.0.0',
+    'wf-minimal-honeycomb-python>=0.6.0',
+    'pandas>=1.2.2',
+    'numpy>=1.20.1',
+    'opencv-python>=4.5.1'
 ]
 
 # TEST_DEPENDENCIES = [
