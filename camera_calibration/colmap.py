@@ -1,5 +1,5 @@
-import cv_utils.core
-import cv_utils.calibration.honeycomb
+import camera_calibration.honeycomb
+import cv_utils
 import video_io
 import pandas as pd
 import numpy as np
@@ -171,7 +171,7 @@ def prepare_colmap_inputs(
         os.makedirs(output_directory, exist_ok=True)
         shutil.copy2(source_path, output_path)
         # Fetch camera position
-        position = cv_utils.calibration.honeycomb.fetch_device_position(
+        position = camera_calibration.honeycomb.fetch_device_position(
             device_id=camera_device_id,
             datetime=image_timestamp,
             client=client,
@@ -356,9 +356,9 @@ def fetch_colmap_image_data_local(
 
                 })
     df = pd.DataFrame(data_list)
-    df['rotation_vector'] = df['quaternion_vector'].apply(cv_utils.core.quaternion_vector_to_rotation_vector)
+    df['rotation_vector'] = df['quaternion_vector'].apply(cv_utils.quaternion_vector_to_rotation_vector)
     df['position'] = df.apply(
-        lambda row: cv_utils.core.extract_camera_position(
+        lambda row: cv_utils.extract_camera_position(
             row['rotation_vector'],
             row['translation_vector']
         ),
@@ -372,13 +372,13 @@ def fetch_colmap_image_data_local(
         else None
     ).astype('string')
     logger.info('Attempting to extract camera device IDs from image names')
-    df['device_id'] = df['image_name'].apply(cv_utils.calibration.honeycomb.extract_honeycomb_id).astype('object')
+    df['device_id'] = df['image_name'].apply(camera_calibration.honeycomb.extract_honeycomb_id).astype('object')
     device_ids = df['device_id'].dropna().unique().tolist()
     logger.info('Found {} device IDs among image names'.format(
         len(device_ids)
     ))
     logger.info('Fetching camera names')
-    camera_names = cv_utils.calibration.honeycomb.fetch_camera_names(
+    camera_names = camera_calibration.honeycomb.fetch_camera_names(
         camera_ids=device_ids,
         chunk_size=chunk_size,
         client=client,
@@ -683,7 +683,7 @@ def write_colmap_output_honeycomb(
         client_id=client_id,
         client_secret=client_secret
     )
-    extrinsic_calibration_ids = cv_utils.calibration.honeycomb.write_extrinsic_calibration_data(
+    extrinsic_calibration_ids = camera_calibration.honeycomb.write_extrinsic_calibration_data(
         data=colmap_output_df,
         start_datetime=calibration_start,
         coordinate_space_id=coordinate_space_id,
@@ -694,7 +694,7 @@ def write_colmap_output_honeycomb(
         client_id=client_id,
         client_secret=client_secret
     )
-    position_assignment_ids = cv_utils.calibration.honeycomb.write_position_data(
+    position_assignment_ids = camera_calibration.honeycomb.write_position_data(
         data=colmap_output_df,
         start_datetime=calibration_start,
         coordinate_space_id=coordinate_space_id,

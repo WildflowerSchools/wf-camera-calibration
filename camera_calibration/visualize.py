@@ -1,6 +1,5 @@
-import cv_utils.core
-import cv_utils.drawing.opencv
-import minimal_honeycomb
+import camera_calibration.honeycomb
+import cv_utils
 import video_io
 import cv2
 import numpy as np
@@ -53,7 +52,7 @@ def visualize_calibration(
     client_secret=None
 ):
     logger.info('Launching Honeycomb client')
-    client = cv_utils.calibration.honeycomb.generate_client(
+    client = camera_calibration.honeycomb.generate_client(
         client=client,
         uri=uri,
         token_uri=token_uri,
@@ -65,7 +64,7 @@ def visualize_calibration(
         if environment_name is None:
             raise ValueError('Must specify either environment ID or environment name')
         logger.info('Environment ID not specified. Fetching environmnt ID for environment name {}'.format(environment_name))
-        environment_id = cv_utils.calibration.honeycomb.fetch_environment_id(
+        environment_id = camera_calibration.honeycomb.fetch_environment_id(
             environment_name=environment_name,
             client=client,
             uri=uri,
@@ -86,7 +85,7 @@ def visualize_calibration(
         floor_height
     )
     if mark_device_locations:
-        device_positions = cv_utils.calibration.honeycomb.fetch_device_positions(
+        device_positions = camera_calibration.honeycomb.fetch_device_positions(
             environment_id=environment_id,
             datetime=visualization_datetime,
             device_types=marked_device_types,
@@ -123,7 +122,7 @@ def visualize_calibration(
     logger.info('Fetched {} images'.format(len(metadata)))
     logger.info('Fetching camera calibrations')
     camera_ids = [metadatum['device_id'] for metadatum in metadata]
-    camera_calibrations = cv_utils.calibration.honeycomb.fetch_camera_calibrations(
+    camera_calibrations = camera_calibration.honeycomb.fetch_camera_calibrations(
         camera_ids=camera_ids,
         start=visualization_datetime,
         end=visualization_datetime,
@@ -136,7 +135,7 @@ def visualize_calibration(
         client_secret=client_secret
     )
     logger.info('Fetching camera names')
-    camera_names = cv_utils.calibration.honeycomb.fetch_camera_names(
+    camera_names = camera_calibration.honeycomb.fetch_camera_names(
         camera_ids=camera_ids,
         chunk_size=chunk_size,
         client=client,
@@ -156,7 +155,7 @@ def visualize_calibration(
             [float(camera_calibration.get('image_width')), float(camera_calibration.get('image_height'))]
         ])
         logger.info('Calculating image points from object points')
-        floor_grid_image_points = cv_utils.core.project_points(
+        floor_grid_image_points = cv_utils.project_points(
             object_points=floor_grid_object_points,
             rotation_vector=camera_calibration.get('rotation_vector'),
             translation_vector=camera_calibration.get('translation_vector'),
@@ -166,7 +165,7 @@ def visualize_calibration(
             remove_outside_frame=True,
             image_corners=image_corners
         )
-        grid_corner_image_points = cv_utils.core.project_points(
+        grid_corner_image_points = cv_utils.project_points(
             object_points=grid_corner_object_points,
             rotation_vector=camera_calibration.get('rotation_vector'),
             translation_vector=camera_calibration.get('translation_vector'),
@@ -177,7 +176,7 @@ def visualize_calibration(
             image_corners=image_corners
         )
         if mark_device_locations:
-            device_image_points = cv_utils.core.project_points(
+            device_image_points = cv_utils.project_points(
                 object_points=device_object_points,
                 rotation_vector=camera_calibration.get('rotation_vector'),
                 translation_vector=camera_calibration.get('translation_vector'),
@@ -266,7 +265,7 @@ def overlay_floor_lines(
     client_secret=None
 ):
     logger.info('Launching Honeycomb client')
-    client = cv_utils.calibration.honeycomb.generate_client(
+    client = camera_calibration.honeycomb.generate_client(
         client=client,
         uri=uri,
         token_uri=token_uri,
@@ -315,7 +314,7 @@ def overlay_floor_lines(
     logger.info('Fetched {} images'.format(len(metadata)))
     logger.info('Fetching camera calibrations')
     camera_ids = [metadatum['device_id'] for metadatum in metadata]
-    camera_calibrations = cv_utils.calibration.honeycomb.fetch_camera_calibrations(
+    camera_calibrations = camera_calibration.honeycomb.fetch_camera_calibrations(
         camera_ids=camera_ids,
         start=visualization_datetime,
         end=visualization_datetime,
@@ -328,7 +327,7 @@ def overlay_floor_lines(
         client_secret=client_secret
     )
     logger.info('Fetching camera names')
-    camera_names = cv_utils.calibration.honeycomb.fetch_camera_names(
+    camera_names = camera_calibration.honeycomb.fetch_camera_names(
         camera_ids=camera_ids,
         chunk_size=chunk_size,
         client=client,
@@ -344,7 +343,7 @@ def overlay_floor_lines(
         camera_name = camera_names[camera_id]
         logger.info('Drawing lines for camera {}'.format(camera_name))
         logger.info('Calculating image points from object points')
-        image_points = cv_utils.core.project_points(
+        image_points = cv_utils.project_points(
             object_points=object_points,
             rotation_vector=camera_calibration.get('rotation_vector'),
             translation_vector=camera_calibration.get('translation_vector'),
@@ -363,7 +362,7 @@ def overlay_floor_lines(
             point = image_points[point_index]
             if np.any(np.isnan(point)):
                 continue
-            image = cv_utils.drawing.opencv.draw_circle(
+            image = cv_utils.draw_circle(
                 original_image=image,
                 coordinates=point,
                 radius=line_point_radius,
@@ -398,7 +397,7 @@ def draw_floor_grid_image_points(
         point = image_points[point_index]
         if np.any(np.isnan(point)):
             continue
-        output_image = cv_utils.drawing.opencv.draw_circle(
+        output_image = cv_utils.draw_circle(
             original_image=output_image,
             coordinates=point,
             radius=radius,
@@ -424,7 +423,7 @@ def draw_device_image_points(
         point = image_points[point_index]
         if np.any(np.isnan(point)):
             continue
-        output_image = cv_utils.drawing.opencv.draw_circle(
+        output_image = cv_utils.draw_circle(
             original_image=output_image,
             coordinates=point,
             radius=radius,
@@ -456,7 +455,7 @@ def draw_floor_grid_corner_labels(
             round(object_point[0]),
             round(object_point[1])
         )
-        output_image = cv_utils.drawing.opencv.draw_text(
+        output_image = cv_utils.draw_text(
             original_image=output_image,
             coordinates=image_point,
             text=text,
@@ -486,7 +485,7 @@ def draw_device_labels(
         if np.any(np.isnan(image_point)):
             continue
         text = labels[point_index]
-        output_image = cv_utils.drawing.opencv.draw_text(
+        output_image = cv_utils.draw_text(
             original_image=output_image,
             coordinates=image_point,
             text=text,

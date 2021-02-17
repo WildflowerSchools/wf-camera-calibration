@@ -1,4 +1,4 @@
-import cv_utils.core
+import cv_utils
 import numpy as np
 import math
 import logging
@@ -21,7 +21,7 @@ def compare_calibrations(
     ))
     calibration_comparisons = dict()
     for device_id in common_device_ids:
-        relative_rotation_vector, relative_translation_vector = cv_utils.core.compose_transformations(
+        relative_rotation_vector, relative_translation_vector = cv_utils.compose_transformations(
             rotation_vector_1=new_calibrations[device_id]['rotation_vector'],
             translation_vector_1=np.array([0.0, 0.0, 0.0]),
             rotation_vector_2=-old_calibrations[device_id]['rotation_vector'],
@@ -30,11 +30,11 @@ def compare_calibrations(
         orientation_difference_angle_radians = np.linalg.norm(relative_rotation_vector)
         orientation_difference_angle_degrees = orientation_difference_angle_radians*360/(2*math.pi)
         orientation_difference_direction = relative_rotation_vector/orientation_difference_angle_radians
-        old_position = cv_utils.core.extract_camera_position(
+        old_position = cv_utils.extract_camera_position(
             rotation_vector=old_calibrations[device_id]['rotation_vector'],
             translation_vector=old_calibrations[device_id]['translation_vector'],
         )
-        new_position = cv_utils.core.extract_camera_position(
+        new_position = cv_utils.extract_camera_position(
             rotation_vector=new_calibrations[device_id]['rotation_vector'],
             translation_vector=new_calibrations[device_id]['translation_vector'],
         )
