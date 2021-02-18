@@ -600,12 +600,12 @@ def compare_colmap_calibration_to_existing(
         .to_dict(orient='index')
     )
     device_ids = list(new_calibrations.keys())
-    old_calibrations = cv_utils.fetch_camera_calibrations(
+    old_calibrations = camera_calibration.honeycomb.fetch_camera_calibrations(
         camera_ids=device_ids,
         start=existing_calibration_time,
         end=existing_calibration_time
     )
-    calibration_comparisons = cv_utils.calibration.analyze.compare_calibrations(
+    calibration_comparisons = camera_calibration.analyze.compare_calibrations(
         old_calibrations=old_calibrations,
         new_calibrations=new_calibrations
     )
@@ -673,7 +673,7 @@ def write_colmap_output_honeycomb(
         ))
     colmap_output_df = colmap_output_df.dropna(subset=['device_id'])
     calibration_start = pd.to_datetime(calibration_start, utc=True).to_pydatetime()
-    intrinsic_calibration_ids = cv_utils.calibration.honeyomb.write_intrinsic_calibration_data(
+    intrinsic_calibration_ids = camera_calibration.honeyomb.write_intrinsic_calibration_data(
         data=colmap_output_df,
         start_datetime=calibration_start,
         client=client,
