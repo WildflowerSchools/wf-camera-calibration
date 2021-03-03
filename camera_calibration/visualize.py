@@ -1,4 +1,4 @@
-import camera_calibration.honeycomb
+import honeycomb_io
 import cv_utils
 import video_io
 import cv2
@@ -51,27 +51,18 @@ def visualize_calibration(
     client_id=None,
     client_secret=None
 ):
-    logger.info('Launching Honeycomb client')
-    client = camera_calibration.honeycomb.generate_client(
-        client=client,
-        uri=uri,
-        token_uri=token_uri,
-        audience=audience,
-        client_id=client_id,
-        client_secret=client_secret
-    )
     if environment_id is None:
         if environment_name is None:
             raise ValueError('Must specify either environment ID or environment name')
         logger.info('Environment ID not specified. Fetching environmnt ID for environment name {}'.format(environment_name))
-        environment_id = camera_calibration.honeycomb.fetch_environment_id(
+        environment_id = honeycomb_io.fetch_environment_id(
             environment_name=environment_name,
             client=client,
             uri=uri,
             token_uri=token_uri,
             audience=audience,
             client_id=client_id,
-            client_secret=Noclient_secretne
+            client_secret=client_secret
         )
     logger.info('Visualizing calibration for environment id {}'.format(environment_id))
     logger.info('Generating object points for grid')
@@ -85,7 +76,7 @@ def visualize_calibration(
         floor_height
     )
     if mark_device_locations:
-        device_positions = camera_calibration.honeycomb.fetch_device_positions(
+        device_positions = honeycomb_io.fetch_device_positions(
             environment_id=environment_id,
             datetime=visualization_datetime,
             device_types=marked_device_types,
@@ -122,7 +113,7 @@ def visualize_calibration(
     logger.info('Fetched {} images'.format(len(metadata)))
     logger.info('Fetching camera calibrations')
     camera_ids = [metadatum['device_id'] for metadatum in metadata]
-    camera_calibrations = camera_calibration.honeycomb.fetch_camera_calibrations(
+    camera_calibrations = honeycomb_io.fetch_camera_calibrations(
         camera_ids=camera_ids,
         start=visualization_datetime,
         end=visualization_datetime,
@@ -135,7 +126,7 @@ def visualize_calibration(
         client_secret=client_secret
     )
     logger.info('Fetching camera names')
-    camera_names = camera_calibration.honeycomb.fetch_camera_names(
+    camera_names = honeycomb_io.fetch_camera_names(
         camera_ids=camera_ids,
         chunk_size=chunk_size,
         client=client,
@@ -264,15 +255,6 @@ def overlay_floor_lines(
     client_id=None,
     client_secret=None
 ):
-    logger.info('Launching Honeycomb client')
-    client = camera_calibration.honeycomb.generate_client(
-        client=client,
-        uri=uri,
-        token_uri=token_uri,
-        audience=audience,
-        client_id=client_id,
-        client_secret=client_secret
-    )
     logger.info('Visualizing calibration for environment id {}'.format(environment_id))
     logger.info('Generating object points for lines')
     object_points = list()
@@ -314,7 +296,7 @@ def overlay_floor_lines(
     logger.info('Fetched {} images'.format(len(metadata)))
     logger.info('Fetching camera calibrations')
     camera_ids = [metadatum['device_id'] for metadatum in metadata]
-    camera_calibrations = camera_calibration.honeycomb.fetch_camera_calibrations(
+    camera_calibrations = honeycomb_io.fetch_camera_calibrations(
         camera_ids=camera_ids,
         start=visualization_datetime,
         end=visualization_datetime,
@@ -327,7 +309,7 @@ def overlay_floor_lines(
         client_secret=client_secret
     )
     logger.info('Fetching camera names')
-    camera_names = camera_calibration.honeycomb.fetch_camera_names(
+    camera_names = honeycomb_io.fetch_camera_names(
         camera_ids=camera_ids,
         chunk_size=chunk_size,
         client=client,

@@ -1,4 +1,5 @@
-import camera_calibration.honeycomb
+import camera_calibration.analyze
+import honeycomb_io
 import cv_utils
 import video_io
 import pandas as pd
@@ -171,7 +172,7 @@ def prepare_colmap_inputs(
         os.makedirs(output_directory, exist_ok=True)
         shutil.copy2(source_path, output_path)
         # Fetch camera position
-        position = camera_calibration.honeycomb.fetch_device_position(
+        position = honeycomb_io.fetch_device_position(
             device_id=camera_device_id,
             datetime=image_timestamp,
             client=client,
@@ -372,13 +373,13 @@ def fetch_colmap_image_data_local(
         else None
     ).astype('string')
     logger.info('Attempting to extract camera device IDs from image names')
-    df['device_id'] = df['image_name'].apply(camera_calibration.honeycomb.extract_honeycomb_id).astype('object')
+    df['device_id'] = df['image_name'].apply(honeycomb_io.extract_honeycomb_id).astype('object')
     device_ids = df['device_id'].dropna().unique().tolist()
     logger.info('Found {} device IDs among image names'.format(
         len(device_ids)
     ))
     logger.info('Fetching camera names')
-    camera_names = camera_calibration.honeycomb.fetch_camera_names(
+    camera_names = honeycomb_io.fetch_camera_names(
         camera_ids=device_ids,
         chunk_size=chunk_size,
         client=client,
@@ -600,7 +601,7 @@ def compare_colmap_calibration_to_existing(
         .to_dict(orient='index')
     )
     device_ids = list(new_calibrations.keys())
-    old_calibrations = camera_calibration.honeycomb.fetch_camera_calibrations(
+    old_calibrations = honeycomb_io.fetch_camera_calibrations(
         camera_ids=device_ids,
         start=existing_calibration_time,
         end=existing_calibration_time
@@ -673,7 +674,7 @@ def write_colmap_output_honeycomb(
         ))
     colmap_output_df = colmap_output_df.dropna(subset=['device_id'])
     calibration_start = pd.to_datetime(calibration_start, utc=True).to_pydatetime()
-    intrinsic_calibration_ids = camera_calibration.honeyomb.write_intrinsic_calibration_data(
+    intrinsic_calibration_ids = honeycomb_io.write_intrinsic_calibration_data(
         data=colmap_output_df,
         start_datetime=calibration_start,
         client=client,
@@ -683,7 +684,7 @@ def write_colmap_output_honeycomb(
         client_id=client_id,
         client_secret=client_secret
     )
-    extrinsic_calibration_ids = camera_calibration.honeycomb.write_extrinsic_calibration_data(
+    extrinsic_calibration_ids = honeycomb_io.write_extrinsic_calibration_data(
         data=colmap_output_df,
         start_datetime=calibration_start,
         coordinate_space_id=coordinate_space_id,
@@ -694,7 +695,7 @@ def write_colmap_output_honeycomb(
         client_id=client_id,
         client_secret=client_secret
     )
-    position_assignment_ids = camera_calibration.honeycomb.write_position_data(
+    position_assignment_ids = honeycomb_io.write_position_data(
         data=colmap_output_df,
         start_datetime=calibration_start,
         coordinate_space_id=coordinate_space_id,
