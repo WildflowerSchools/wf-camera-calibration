@@ -225,6 +225,68 @@ def prepare_colmap_inputs(
                 )
                 shutil.copy2(source_path, output_path)
 
+def generate_image_info_file(
+    calibration_directory=None,
+    calibration_identifier=None,
+    image_info_path=None,
+    environment_id=None,
+    environment_name=None,
+    default_image_timestamp=None,
+    default_camera_type=None,
+    chunk_size=100,
+    client=None,
+    uri=None,
+    token_uri=None,
+    audience=None,
+    client_id=None,
+    client_secret=None
+):
+    # Set output directory and path
+    if image_info_path is None:
+        if calibration_directory is None or calibration_identifier is None:
+            raise ValueError('Must specify either image info path or calibration directory and calibration identifier')
+        output_directory = os.path.join(
+            calibration_directory,
+            calibration_identifier
+        )
+        image_info_path = os.path.join(
+            output_directory,
+            'image_info.csv'
+        )
+    else:
+        output_directory = os.path.dirname(os.path.normpath(image_info_path))
+    if default_image_timestamp is None:
+        default_image_timestamp = datetime.datetime.now(tz=datetime.timezone.utc)
+    camera_info_df = honeycomb_io.fetch_camera_info(
+        environment_id=environment_id,
+        environment_name=environment_name,
+        start=default_image_timestamp,
+        end=default_image_timestamp,
+        chunk_size=chunk_size,
+        client=client,
+        uri=uri,
+        token_uri=token_uri,
+        audience=audience,
+        client_id=client_id,
+        client_secret=client_secret
+    )
+    image_info_df = (
+        camera_info_df
+        .reindex(columns=[
+            'device_name',
+            'part_number'
+        ])
+        .rename(columns={
+            'device_name': 'camera_name',
+            'part_number': 'camera_type'
+        })
+    )
+    if default_camera_type is not None:
+        image_info_df['camera_type'] = default_camera_type
+    image_info_df['image_timestamp'] = default_image_timestamp.isoformat()
+    os.makedirs(output_directory, exist_ok=True)
+    image_info_df.to_csv(image_info_path)
+
 def fetch_colmap_output_data_local(
     calibration_directory=None,
     calibration_identifier=None,
