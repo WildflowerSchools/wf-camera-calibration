@@ -66,12 +66,12 @@ def visualize_calibration(
         )
     logger.info('Visualizing calibration for environment id {}'.format(environment_id))
     logger.info('Generating object points for grid')
-    floor_grid_object_points = cv_utils.generate_floor_grid_object_points(
+    floor_grid_object_points = generate_floor_grid_object_points(
         room_corners=room_corners,
         floor_height=0.0,
         num_points_per_distance_unit=num_grid_points_per_distance_unit
     )
-    grid_corner_object_points = cv_utils.generate_grid_corner_object_points(
+    grid_corner_object_points = generate_grid_corner_object_points(
         room_corners,
         floor_height
     )
