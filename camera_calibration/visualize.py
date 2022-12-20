@@ -98,7 +98,6 @@ def visualize_calibration(
     metadata = video_io.fetch_images(
         image_timestamps=[visualization_datetime],
         environment_id=environment_id,
-        chunk_size=chunk_size,
         client=client,
         uri=uri,
         token_uri=token_uri,
