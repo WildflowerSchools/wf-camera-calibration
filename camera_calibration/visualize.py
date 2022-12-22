@@ -438,7 +438,7 @@ def draw_floor_grid_corner_labels(
         )
         output_image = cv_utils.draw_text(
             original_image=output_image,
-            coordinates=image_point,
+            anchor_coordinates=image_point,
             text=text,
             horizontal_alignment=horizontal_alignment,
             vertical_alignment=vertical_alignment,
@@ -468,7 +468,7 @@ def draw_device_labels(
         text = labels[point_index]
         output_image = cv_utils.draw_text(
             original_image=output_image,
-            coordinates=image_point,
+            anchor_coordinates=image_point,
             text=text,
             horizontal_alignment=horizontal_alignment,
             vertical_alignment=vertical_alignment,
