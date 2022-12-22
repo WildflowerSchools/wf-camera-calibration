@@ -40,7 +40,7 @@ def visualize_calibration(
     local_image_directory='./images',
     image_filename_extension='png',
     local_video_directory='./videos',
-    video_filename_extension='mp4',
+    video_filename_extension=None,
     output_directory='./image_overlays',
     output_filename_extension='png',
     chunk_size=100,
