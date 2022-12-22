@@ -40,7 +40,7 @@ def visualize_calibration(
     local_image_directory='./images',
     image_filename_extension='png',
     local_video_directory='./videos',
-    video_filename_extension='mp4',
+    video_filename_extension=None,
     output_directory='./image_overlays',
     output_filename_extension='png',
     chunk_size=100,
@@ -66,12 +66,12 @@ def visualize_calibration(
         )
     logger.info('Visualizing calibration for environment id {}'.format(environment_id))
     logger.info('Generating object points for grid')
-    floor_grid_object_points = cv_utils.generate_floor_grid_object_points(
+    floor_grid_object_points = generate_floor_grid_object_points(
         room_corners=room_corners,
         floor_height=0.0,
         num_points_per_distance_unit=num_grid_points_per_distance_unit
     )
-    grid_corner_object_points = cv_utils.generate_grid_corner_object_points(
+    grid_corner_object_points = generate_grid_corner_object_points(
         room_corners,
         floor_height
     )
@@ -98,7 +98,6 @@ def visualize_calibration(
     metadata = video_io.fetch_images(
         image_timestamps=[visualization_datetime],
         environment_id=environment_id,
-        chunk_size=chunk_size,
         client=client,
         uri=uri,
         token_uri=token_uri,
@@ -439,7 +438,7 @@ def draw_floor_grid_corner_labels(
         )
         output_image = cv_utils.draw_text(
             original_image=output_image,
-            coordinates=image_point,
+            anchor_coordinates=image_point,
             text=text,
             horizontal_alignment=horizontal_alignment,
             vertical_alignment=vertical_alignment,
@@ -469,7 +468,7 @@ def draw_device_labels(
         text = labels[point_index]
         output_image = cv_utils.draw_text(
             original_image=output_image,
-            coordinates=image_point,
+            anchor_coordinates=image_point,
             text=text,
             horizontal_alignment=horizontal_alignment,
             vertical_alignment=vertical_alignment,
