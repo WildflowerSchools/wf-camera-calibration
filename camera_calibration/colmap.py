@@ -18,6 +18,8 @@ RECOGNIZED_IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif']
 def prepare_colmap_inputs(
     calibration_directory=None,
     calibration_identifier=None,
+    environment_id=None,
+    environment_name=None,
     image_info_path=None,
     images_directory_path=None,
     ref_images_data_path=None,
@@ -32,7 +34,6 @@ def prepare_colmap_inputs(
     local_image_directory='./images',
     image_filename_extension='png',
     local_video_directory='./videos',
-    video_filename_extension='mp4'
 ):
     """
     Prepares COLMAP input files based on data in local files and in Honeycomb.
@@ -139,18 +140,18 @@ def prepare_colmap_inputs(
         camera_type = camera['camera_type']
         image_metadata = video_io.fetch_images(
             image_timestamps=[image_timestamp],
+            environment_id=environment_id,
+            environment_name=environment_name,
             camera_device_ids=[camera_device_id],
-            chunk_size=chunk_size,
+            local_image_directory=local_image_directory,
+            image_filename_extension=image_filename_extension,
+            local_video_directory=local_video_directory,
             client=client,
             uri=uri,
             token_uri=token_uri,
             audience=audience,
             client_id=client_id,
             client_secret=client_secret,
-            local_image_directory=local_image_directory,
-            image_filename_extension=image_filename_extension,
-            local_video_directory=local_video_directory,
-            video_filename_extension=video_filename_extension
         )
         if len(image_metadata) > 1:
             raise ValueError('More than one image returned for this camera and timestamp')
