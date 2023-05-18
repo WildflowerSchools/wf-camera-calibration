@@ -758,7 +758,7 @@ def write_colmap_output_honeycomb(
         client_id=client_id,
         client_secret=client_secret
     )
-    position_assignment_ids = honeycomb_io.write_position_data(
+    position_assignment_ids = honeycomb_io.devices.write_position_data(
         data=colmap_output_df,
         start_datetime=calibration_start,
         coordinate_space_id=coordinate_space_id,
