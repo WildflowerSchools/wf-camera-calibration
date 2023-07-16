@@ -493,34 +493,11 @@ def fetch_colmap_reference_image_data_local(
     Returns:
         (DataFrame) Dataframe containing camera position input data
     """
-    if path is None:
-        if calibration_directory is None or calibration_identifier is None:
-            raise ValueError('Must specify either ref image data path or calibration directory and calibration identifier')
-        path = os.path.join(
-            calibration_directory,
-            calibration_identifier,
-            'ref_images.txt'
-        )
-    df = pd.read_csv(
-        path,
-        header=None,
-        delim_whitespace=True,
-        names = ['image_path', 'x', 'y', 'z'],
-        dtype={
-            'image_path': 'string',
-            'x': 'float',
-            'y': 'float',
-            'z': 'float',
-        }
+    df = cv_utils.fetch_colmap_reference_image_data_local(
+        calibration_directory=calibration_directory,
+        calibration_identifier=calibration_identifier,
+        path=path
     )
-    df['position_input'] = df.apply(
-        lambda row: np.array([row['x'], row['y'], row['z']]),
-        axis=1
-    )
-    df.set_index('image_path', inplace=True)
-    df = df.reindex(columns=[
-        'position_input'
-    ])
     return df
 
 def compare_colmap_calibration_to_existing(
