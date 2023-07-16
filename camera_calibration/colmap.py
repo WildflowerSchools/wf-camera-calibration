@@ -389,52 +389,11 @@ def fetch_colmap_image_data_local(
     Returns:
         (DataFrame) Dataframe containing image data
     """
-    if path is None:
-        if calibration_directory is None or calibration_identifier is None:
-            raise ValueError('Must specify either image data path or calibration directory and calibration identifier')
-        path = os.path.join(
-            calibration_directory,
-            calibration_identifier,
-            'images.txt'
-        )
-    data_list = list()
-    with open(path, 'r') as fp:
-        for line in fp.readlines():
-            m = re.match(CALIBRATION_DATA_RE, line)
-            if m:
-                data_list.append({
-                    'colmap_image_id': int(m.group('colmap_image_id')),
-                    'quaternion_vector': np.asarray([
-                        float(m.group('qw')),
-                        float(m.group('qx')),
-                        float(m.group('qy')),
-                        float(m.group('qz'))
-                    ]),
-                    'translation_vector': np.asarray([
-                        float(m.group('tx')),
-                        float(m.group('ty')),
-                        float(m.group('tz'))
-                    ]),
-                    'colmap_camera_id': int(m.group('colmap_camera_id')),
-                    'image_path': m.group('image_path')
-
-                })
-    df = pd.DataFrame(data_list)
-    df['rotation_vector'] = df['quaternion_vector'].apply(cv_utils.quaternion_vector_to_rotation_vector)
-    df['position'] = df.apply(
-        lambda row: cv_utils.extract_camera_position(
-            row['rotation_vector'],
-            row['translation_vector']
-        ),
-        axis=1
+    df = cv_utils.fetch_colmap_image_data_local(
+        calibration_directory=calibration_directory,
+        calibration_identifier=calibration_identifier,
+        path=path,
     )
-    df['image_directory'] = df['image_path'].apply(lambda x: os.path.dirname(os.path.normpath(x))).astype('string')
-    df['image_name'] = df['image_path'].apply(lambda x: os.path.splitext(os.path.basename(os.path.normpath(x)))[0]).astype('string')
-    df['image_extension'] = df['image_path'].apply(
-        lambda x: os.path.splitext(os.path.basename(os.path.normpath(x)))[1][1:]
-        if len(os.path.splitext(os.path.basename(os.path.normpath(x)))[1]) > 1
-        else None
-    ).astype('string')
     logger.info('Attempting to extract camera device IDs from image names')
     df['device_id'] = df['image_name'].apply(honeycomb_io.extract_honeycomb_id).astype('object')
     device_ids = df['device_id'].dropna().unique().tolist()
@@ -456,7 +415,6 @@ def fetch_colmap_image_data_local(
         pd.Series(camera_names, name='camera_name'),
         on='device_id'
     )
-    df.set_index('colmap_image_id', inplace=True)
     df = df.reindex(columns=[
         'image_path',
         'image_directory',
@@ -465,7 +423,6 @@ def fetch_colmap_image_data_local(
         'camera_name',
         'image_extension',
         'colmap_camera_id',
-        'quaternion_vector',
         'rotation_vector',
         'translation_vector',
         'position'
