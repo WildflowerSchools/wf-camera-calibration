@@ -655,28 +655,3 @@ def write_colmap_output_honeycomb(
         'position_assignment_ids': position_assignment_ids
     }
     return honeycomb_ids
-
-def extract_colmap_image_calibration_data(
-    input_path,
-    output_path
-):
-    output_lines = list()
-    with open(input_path, 'r') as fp:
-        for line in fp.readlines():
-            m = re.match(CALIBRATION_DATA_RE, line)
-            if m:
-                output_line = ','.join([
-                    m.group('colmap_image_id'),
-                    m.group('qw'),
-                    m.group('qx'),
-                    m.group('qy'),
-                    m.group('qz'),
-                    m.group('tx'),
-                    m.group('ty'),
-                    m.group('tz'),
-                    m.group('colmap_camera_id'),
-                    m.group('image_path')
-                ])
-                output_lines.append(output_line)
-    with open(output_path, 'w') as fp:
-        fp.write('\n'.join(output_lines))
